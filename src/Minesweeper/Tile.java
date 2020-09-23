@@ -5,32 +5,34 @@ import java.util.Random;
 
 public class Tile {
     private final String type;
-    private final int x;
-    private final int y;
+    private final String x;
+    private final String y;
+    private final String placement;
 
     // Here x and y are coordinate, and don't include 0 for both x and y
     Tile(String placement) {
+        this.placement = placement;
         this.type = placement.substring(0,1);
-        this.x = Integer.parseInt(placement.substring(1,2));
-        this.y = Integer.parseInt(placement.substring(2,3));
+        this.x = placement.substring(1,3);
+        this.y = placement.substring(3,5);
     }
 
     public String getType() {
         return this.type;
     }
 
-    public int getX() {
+    public String getX() {
         return this.x;
     }
 
-    public int getY() {
+    public String getY() {
         return this.y;
     }
 
     public static ArrayList<Tile> deserialize(String state) {
         ArrayList<Tile> tiles = new ArrayList<>();
-        for (int i = 0; i < state.length(); i+=3) {
-            tiles.add(new Tile(state.substring(i, i+3)));
+        for (int i = 0; i < state.length(); i+=5) {
+            tiles.add(new Tile(state.substring(i, i+5)));
         }
         return tiles;
     }
@@ -43,15 +45,60 @@ public class Tile {
         return acc.toString();
     }
 
-    public static String[] bombGenerator(String[] state) {
+    // Add one bomb to the bomb
+    public static void bombGenerator(String[] state) {
+        ArrayList<Tile> tiles = deserialize(state[2]);
+        ArrayList<String> pos = new ArrayList<>();
+
         int boundX = Integer.parseInt(state[0]);
         int boundY = Integer.parseInt(state[1]);
+        int newX;
+        int newY;
+        String newXstr;
+        String newYstr;
+
+        for (Tile x:tiles) {
+            pos.add(x.getX()+""+x.getY());
+        }
+
         Random rand = new Random(System.nanoTime());
-        return state; //FIXME: Not finished here
+        do {
+            newX = rand.nextInt(boundX) + 1;
+            newY = rand.nextInt(boundY) + 1;
+            newXstr = (newX < 10) ? "0"+newX : newX+"";
+            newYstr = (newY < 10) ? "0"+newY : newY+"";
+        } while (pos.contains(newXstr + newYstr));
+
+        String rtn = "B" + newXstr + newYstr;
+        state[2] += rtn;
+
+    }
+
+    // Fill the empty place with normal tile
+    public static void fillInNormal(String[] state) {
+        ArrayList<Tile> tiles = deserialize(state[2]);
+        ArrayList<String> pos = new ArrayList<>();
+
+        int boundX = Integer.parseInt(state[0]);
+        int boundY = Integer.parseInt(state[1]);
+
+        for (Tile x:tiles) {
+            pos.add(x.getX()+""+x.getY());
+        }
+
+        for (int i = 1; i <= boundX; i++) {
+            for (int j = 1; j <= boundY; j++) {
+                String placement = ((i < 10) ? "0"+i : i)+""+((j < 10) ? "0"+j : j);
+                if (!pos.contains(placement)) {
+                    state[2] += "N"+placement;
+                }
+            }
+        }
+
     }
 
     @Override
     public String toString() {
-        return type + x + y;
+        return this.placement;
     }
 }

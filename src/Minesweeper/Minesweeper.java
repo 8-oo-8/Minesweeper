@@ -11,8 +11,9 @@ public class Minesweeper {
 
 
     // String[] -> [x-width][y-height][board state]
+    // Maximum board 99 * 99 (can't be larger)
     public static boolean isBoardStateValid(String[] state) {
-        if (state[2].length() % 3 != 0) return false;
+        if (state[2].length() % 5 != 0) return false;
 
         int boundX = Integer.parseInt(state[0]);
         int boundY = Integer.parseInt(state[1]);
@@ -24,8 +25,9 @@ public class Minesweeper {
 
         ArrayList<Tile> tiles = Tile.deserialize(state[2]);
         for (Tile x:tiles) {
-            if (!types.contains(x.getType()) || x.getX() < 1 ||
-                    x.getX() > boundX || x.getY() < 1 || x.getY() > boundY) return false;
+            if (!types.contains(x.getType()) || Integer.parseInt(x.getX()) < 1 ||
+                    Integer.parseInt(x.getX()) > boundX ||
+                    Integer.parseInt(x.getY()) < 1 || Integer.parseInt(x.getY()) > boundY) return false;
             posL.add(x.getX()+""+x.getY());
             posS.add(x.getX()+""+ x.getY());
             counter++;
@@ -34,5 +36,16 @@ public class Minesweeper {
         return counter == boundX * boundY;
     }
 
+    // Generate a valid board state for the given width and height, with given number of bombs
+    public static String[] generateBoardState(int width, int height, int bomb) {
+        String[] rtn = {Integer.toString(width), Integer.toString(height), ""};
+        for (int i = 0; i < bomb; i++) {
+            Tile.bombGenerator(rtn);
+        }
+
+        Tile.fillInNormal(rtn);
+
+        return rtn;
+    }
 
 }
