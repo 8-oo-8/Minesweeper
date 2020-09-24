@@ -14,8 +14,8 @@ import javafx.stage.Stage;
 
 
 public class Game extends Application {
-    private static final int introWidth = 900;
-    private static final int introHeight = 900;
+    private static final int introWidth = 1024;
+    private static final int introHeight = 768;
     private static final String URI_BASE = "assets/";
 
     private final Group introRoot = new Group();
@@ -37,7 +37,7 @@ public class Game extends Application {
         makeIntroControls();
         makeIntroBackground();
 
-        primaryStage.setScene(new Scene(introRoot, introHeight, introHeight));
+        primaryStage.setScene(new Scene(introRoot, introWidth, introHeight));
 
         primaryStage.show();
     }
@@ -51,7 +51,7 @@ public class Game extends Application {
         text.setText("Minesweeper");
         text.setFont(Font.font("Verdana", FontWeight.BOLD, 60));
         text.setFill(Color.WHITE);
-        text.setLayoutX(230);
+        text.setLayoutX(295);
         text.setLayoutY(150);
 
         baseBoard.setImage(background);
