@@ -97,6 +97,25 @@ public class Tile implements Comparable<Tile> {
 
     }
 
+    public static Tile getTileFromXY(String[] state, String xs, String ys) {
+        int x = Integer.parseInt(xs);
+        int y = Integer.parseInt(ys);
+        int boundX = Integer.parseInt(state[0]);
+        int boundY = Integer.parseInt(state[1]);
+        ArrayList<Tile> tiles = Tile.deserialize(state[2]);
+
+        if (x > boundX || x <= 0 || y > boundY || y <= 0) {
+            return null;
+        } else {
+            for (Tile t:tiles) {
+                if ((t.getX()+t.getY()).equals(xs+ys)) {
+                    return t;
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return this.placement;
