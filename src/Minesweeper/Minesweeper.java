@@ -48,4 +48,33 @@ public class Minesweeper {
         return rtn;
     }
 
+    public static String[] updateBoardState(String[] state, String newTile) {
+        String[] rtn = {state[0], state[1], ""};
+        int boundX = Integer.parseInt(state[0]);
+        int boundY = Integer.parseInt(state[1]);
+        ArrayList<Tile> tiles = Tile.deserialize(state[2]);
+        ArrayList<String> pos = new ArrayList<>();
+        Tile newTileT = new Tile(newTile);
+        String tilePos = newTileT.getX() + newTileT.getY();
+
+        for (Tile x:tiles) {
+            pos.add(x.getX() + x.getY());
+        }
+
+        if (pos.contains(tilePos)) {
+            int index = pos.indexOf(tilePos);
+            tiles.set(index, newTileT);
+        } else {
+            int x = Integer.parseInt(newTileT.getX());
+            int y = Integer.parseInt(newTileT.getY());
+            if (x > 0 && x <= boundX && y > 0 && y <= boundY) {
+                tiles.add(newTileT);
+            }
+        }
+
+        rtn[2] = Tile.serialize(tiles);
+
+        return rtn;
+    }
+
 }
