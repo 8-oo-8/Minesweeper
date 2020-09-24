@@ -2,6 +2,7 @@
   <configuration default="false" name="Game" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="Minesweeper.gui.Game" />
     <module name="Minesweeper" />
+    <option name="VM_PARAMETERS" value="--module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml,javafx.media" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="Minesweeper.gui.*" />

@@ -3,7 +3,7 @@ package Minesweeper;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Tile {
+public class Tile implements Comparable<Tile> {
     private final String type;
     private final String x;
     private final String y;
@@ -100,5 +100,19 @@ public class Tile {
     @Override
     public String toString() {
         return this.placement;
+    }
+
+    @Override
+    public int compareTo(Tile o) {
+        int thisX = Integer.parseInt(this.getX());
+        int thisY = Integer.parseInt(this.getY());
+        int otherX = Integer.parseInt(o.getX());
+        int otherY = Integer.parseInt(o.getY());
+
+        if (thisX != otherX) {
+            return Integer.compare(thisX, otherX);
+        } else {
+            return Integer.compare(thisY, otherY);
+        }
     }
 }

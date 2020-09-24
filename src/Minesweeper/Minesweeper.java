@@ -6,10 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Minesweeper {
-    // TODO: Some game related method here [Needless to write tests]
-    // TODO: Create other classes for the game structure
-
-
     // String[] -> [x-width][y-height][board state]
     // Maximum board 99 * 99 (can't be larger)
     public static boolean isBoardStateValid(String[] state) {
