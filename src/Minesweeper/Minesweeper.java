@@ -73,7 +73,6 @@ public class Minesweeper {
         return rtn;
     }
 
-    // TODO: Need refactor here
     public static ArrayList<Tile> neighbours(String[] boardState, String xs, String ys) {
         ArrayList<Tile> rtn = new ArrayList<>();
         int x = Integer.parseInt(xs);
@@ -85,110 +84,35 @@ public class Minesweeper {
         int boundX = Integer.parseInt(boardState[0]);
         int boundY = Integer.parseInt(boardState[1]);
 
-        if (x == 1 && y == 1) {
-            rtn.add(Tile.getTileFromXY(boardState, "02", "01"));
-            rtn.add(Tile.getTileFromXY(boardState, "01", "02"));
-            rtn.add(Tile.getTileFromXY(boardState, "02", "02"));
-        } else if (x == boundX && y == boundY) {
-            newX = x - 1;
-            newY = y - 1;
-            newXStr = (newX < 10) ? "0" + newX : newX + "";
-            newYStr = (newY < 10) ? "0" + newY : newY + "";
-            rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-            rtn.add(Tile.getTileFromXY(boardState, newXStr, ys));
-            rtn.add(Tile.getTileFromXY(boardState, xs, newYStr));
-        } else if (x == boundX && y == 1) {
-            newX = x - 1;
-            newXStr = (newX < 10) ? "0" + newX : newX + "";
-            rtn.add(Tile.getTileFromXY(boardState, newXStr, "01"));
-            rtn.add(Tile.getTileFromXY(boardState, xs, "02"));
-            rtn.add(Tile.getTileFromXY(boardState, newXStr, "02"));
-        } else if (x == 1 && y == boundY) {
-            newY = y - 1;
-            newYStr = (newY < 10) ? "0" + newY : newY + "";
-            rtn.add(Tile.getTileFromXY(boardState, "01", newYStr));
-            rtn.add(Tile.getTileFromXY(boardState, "02", ys));
-            rtn.add(Tile.getTileFromXY(boardState, "02", newYStr));
-        } else if (x == 1 || x == boundX) {
-            if (x == 1) {
-                newY = y - 1;
-                newYStr = (newY < 10) ? "0" + newY : newY + "";
-                rtn.add(Tile.getTileFromXY(boardState, "01", newYStr));
-                newY = y + 1;
-                newYStr = (newY < 10) ? "0" + newY : newY + "";
-                rtn.add(Tile.getTileFromXY(boardState, "01", newYStr));
-                newXStr = "02";
-                for (int i = -1; i < 2; i++) {
-                    newY = y + i;
-                    newYStr = (newY < 10) ? "0" + newY : newY + "";
-                    rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-                }
-            } else {
-                newX = x - 1;
-                newXStr = (newX < 10) ? "0" + newX : newX + "";
-                newY = y - 1;
-                newYStr = (newY < 10) ? "0" + newY : newY + "";
-                rtn.add(Tile.getTileFromXY(boardState, xs, newYStr));
-                newY = y + 1;
-                newYStr = (newY < 10) ? "0" + newY : newY + "";
-                rtn.add(Tile.getTileFromXY(boardState, xs, newYStr));
-                for (int i = -1; i < 2; i++) {
-                    newY = y + i;
-                    newYStr = (newY < 10) ? "0" + newY : newY + "";
-                    rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-                }
-            }
-        } else if (y == 1 || y == boundY) {
-            if (y == 1) {
-                newX = x - 1;
-                newXStr = (newX < 10) ? "0" + newX : newX + "";
-                rtn.add(Tile.getTileFromXY(boardState, newXStr, "01"));
-                newX = x + 1;
-                newXStr = (newX < 10) ? "0" + newX : newX + "";
-                rtn.add(Tile.getTileFromXY(boardState, newXStr, "01"));
-                newYStr = "02";
-                for (int i = -1; i < 2; i++) {
-                    newX = x + i;
-                    newXStr = (newX < 10) ? "0" + newX : newX + "";
-                    rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-                }
-            } else {
-                newX = x - 1;
-                newXStr = (newX < 10) ? "0" + newX : newX + "";
-                rtn.add(Tile.getTileFromXY(boardState, newXStr, ys));
-                newX = x + 1;
-                newXStr = (newX < 10) ? "0" + newX : newX + "";
-                rtn.add(Tile.getTileFromXY(boardState, newXStr, ys));
-                newY = y - 1;
-                newYStr = (newY < 10) ? "0" + newY : newY + "";
-                for (int i = -1; i < 2; i++) {
-                    newX = x + i;
-                    newXStr = (newX < 10) ? "0" + newX : newX + "";
-                    rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-                }
-            }
-        } else {
-            for (int i = -1; i < 2; i++) {
-                for (int j = -1; j < 2; j++) {
-                    newX = x + i;
-                    newY = y + j;
+        for (int i = -1 ; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                newX = x + i;
+                newY = y + j;
+                newXStr = (newX < 10) ? "0"+newX : newX+"";
+                newYStr = (newY < 10) ? "0"+newY : newY+"";
 
-                    newXStr = (newX < 10) ? "0" + newX : newX + "";
-                    newYStr = (newY < 10) ? "0" + newY : newY + "";
-
-                    if (i != 0 || j != 0) {
-                        rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
-                    }
+                if ((j != 0 || i != 0 ) && newX > 0 && newX <= boundX && newY > 0 && newY <= boundY) {
+                    rtn.add(Tile.getTileFromXY(boardState, newXStr, newYStr));
                 }
             }
-        }
+         }
         return rtn;
     }
 
     public static ArrayList<Hint> generateHint(String[] boardState) {
         ArrayList<Hint> rtn = new ArrayList<>();
+        ArrayList<Tile> tiles = Tile.deserialize(boardState[2]);
 
+        for (Tile x:tiles) {
+            int count = 0;
+            ArrayList<Tile> neighbours = neighbours(boardState, x.getX(), x.getY());
+            for (Tile t:neighbours) {
+                if (t.getType().equals("B")) {
+                    count++;
+                }
+            }
+            rtn.add(new Hint(count, x.getX(), x.getY()));
+        }
         return rtn;
     }
-
 }

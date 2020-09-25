@@ -5,7 +5,7 @@ public class Hint {
     private final String x;
     private final String y;
 
-    Hint(int value, String x, String y) {
+    public Hint(int value, String x, String y) {
         this.value = value;
         this.x = x;
         this.y = y;
@@ -21,6 +21,11 @@ public class Hint {
 
     public String getY() {
         return this.y;
+    }
+
+    @Override
+    public String toString() {
+        return value + x + y;
     }
 }
 
