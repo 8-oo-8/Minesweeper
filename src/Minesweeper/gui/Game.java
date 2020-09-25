@@ -45,7 +45,8 @@ public class Game extends Application {
     private final Group gameBoard = new Group();
     private boolean isGameFinished = false;
     private String[] state;
-    ArrayList<TileGUI> tiles;
+    ArrayList<Tile> tiles;
+    ArrayList<TileGUI> showTile;
     ArrayList<Hint> hints;
     ArrayList<HintGUI> showHint;
     ArrayList<Tile> original = new ArrayList<>();
@@ -169,6 +170,7 @@ public class Game extends Application {
 
                         state = Minesweeper.generateBoardState(gameWidth, gameHeight, gameBomb);
                         hints = Minesweeper.generateHint(state);
+                        tiles = Tile.deserialize(state[2]);
 
                         gameRoot.getChildren().add(gameHint);
                         gameRoot.getChildren().add(gameBoard);
