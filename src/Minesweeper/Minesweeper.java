@@ -44,8 +44,8 @@ public class Minesweeper {
         return rtn;
     }
 
+    // FIXME: BUGS here
     public static void updateBoardState(String[] state, String newTile) {
-        String[] rtn = {state[0], state[1], ""};
         int boundX = Integer.parseInt(state[0]);
         int boundY = Integer.parseInt(state[1]);
         ArrayList<Tile> tiles = Tile.deserialize(state[2]);
@@ -68,7 +68,7 @@ public class Minesweeper {
             }
         }
 
-        rtn[2] = Tile.serialize(tiles);
+        state[2] = Tile.serialize(tiles);
 
     }
 

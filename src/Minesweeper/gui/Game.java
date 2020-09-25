@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class Game extends Application {
     private static final int introWidth = 1024;
     private static final int introHeight = 768;
-    private static final int tileSize = 20;
+    private static final int tileSize = 30;
     private static final String URI_BASE = "assets/";
 
     private final Group introRoot = new Group();
@@ -136,7 +136,7 @@ public class Game extends Application {
         introControls.getChildren().add(bomb);
 
         HBox hb = new HBox();
-        hb.getChildren().addAll(width, widthTextField,height, heightTextField, bomb, bombNumber);
+        hb.getChildren().addAll(width, widthTextField, height, heightTextField, bomb, bombNumber);
         hb.setSpacing(30);
         hb.setLayoutX(120);
         hb.setLayoutY(introHeight - 220);
@@ -155,52 +155,60 @@ public class Game extends Application {
         startButton.setLayoutY(introHeight - startButton.getPrefHeight() - 50);
 
         // Set on button action
-        startButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                try {
-                    int gameWidth = Integer.parseInt(widthTextField.getText());
-                    int gameHeight = Integer.parseInt(heightTextField.getText());
-                    int gameBomb = Integer.parseInt(bombNumber.getText());
+        startButton.setOnAction(actionEvent -> {
+            try {
+                int gameWidth = Integer.parseInt(widthTextField.getText());
+                int gameHeight = Integer.parseInt(heightTextField.getText());
+                int gameBomb = Integer.parseInt(bombNumber.getText());
 
-                    if (gameBomb >= 0 && gameBomb < gameWidth * gameHeight && gameWidth > 0 && gameWidth < 100 &&
-                            gameHeight > 0 && gameHeight < 100 && (gameWidth != 1 || gameHeight != 1)) {
+                if (gameBomb >= 0 && gameBomb < gameWidth * gameHeight && gameWidth > 0 && gameWidth < 100 &&
+                        gameHeight > 0 && gameHeight < 100 && (gameWidth != 1 || gameHeight != 1)) {
 
-                        Scene gameScene = new Scene(gameRoot, tileSize * gameWidth, tileSize * gameHeight);
+                    Scene gameScene = new Scene(gameRoot, tileSize * gameWidth, tileSize * gameHeight);
 
-                        state = Minesweeper.generateBoardState(gameWidth, gameHeight, gameBomb);
-                        hints = Minesweeper.generateHint(state);
-                        tiles = Tile.deserialize(state[2]);
+                    state = Minesweeper.generateBoardState(gameWidth, gameHeight, gameBomb);
+                    hints = Minesweeper.generateHint(state);
+                    tiles = Tile.deserialize(state[2]);
 
-                        gameRoot.getChildren().add(gameHint);
-                        gameRoot.getChildren().add(gameBoard);
+                    gameRoot.getChildren().add(gameHint);
+                    gameRoot.getChildren().add(gameBoard);
 
-                        makeHinter();
-                        makeBoard();
+                    makeHinter();
+                    makeBoard();
 
-                        Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+                    Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
-                        window.setScene(gameScene);
-                        window.show();
+                    window.setScene(gameScene);
+                    window.show();
 
-                    } else {
-                        problemNumber = true;
-                        makeIntroInstruction();
-                    }
-                } catch (Exception ignored) {
+                } else {
                     problemNumber = true;
                     makeIntroInstruction();
                 }
+            } catch (Exception ignored) {
+                problemNumber = true;
+                makeIntroInstruction();
             }
         });
     }
 
-    private void makeTimer() {
+    private void makeBoard() {
+        gameBoard.getChildren().clear();
 
+        showTile = drawTiles();
+        for (TileGUI s : showTile
+        ) {
+            System.out.println(s);
+        }
+        gameBoard.getChildren().addAll(showTile);
     }
 
-    private void makeBoard() {
-
+    private ArrayList<TileGUI> drawTiles() {
+        ArrayList<TileGUI> rtn = new ArrayList<>();
+        for (Tile x : tiles) {
+            rtn.add(new TileGUI(x.toString()));
+        }
+        return rtn;
     }
 
     private void makeHinter() {
@@ -210,19 +218,22 @@ public class Game extends Application {
         gameHint.toBack();
     }
 
-    public ArrayList<HintGUI> drawHints() {
+    private ArrayList<HintGUI> drawHints() {
         ArrayList<HintGUI> rtn = new ArrayList<>();
-        for (Hint x:hints) {
+        for (Hint x : hints) {
             rtn.add(new HintGUI(x.getValue(), Integer.parseInt(x.getX()), Integer.parseInt(x.getY())));
         }
         return rtn;
     }
 
     class TileGUI extends ImageView {
+        String type;
+        int x;
+        int y;
         TileGUI(String placement) {
-            String type = placement.substring(0, 1);
-            int x = Integer.parseInt(placement.substring(1, 3));
-            int y = Integer.parseInt(placement.substring(3, 5));
+            type = placement.substring(0, 1);
+            x = Integer.parseInt(placement.substring(1, 3));
+            y = Integer.parseInt(placement.substring(3, 5));
 
             // Load the Normal image
             Image image;
@@ -238,16 +249,19 @@ public class Game extends Application {
             // Set on event handler
             setOnMousePressed(event -> {
                 if (!isGameFinished) {
+                    // FIXME: Can't read and show the new image(should replace tile, not load again)
                     String xs = (x < 10) ? "0" + x : x + "";
                     String ys = (y < 10) ? "0" + y : y + "";
                     if (type.equals("N")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             // TODO: Scan surroundings
                             setImage(new Image(TileGUI.class.getResource(URI_BASE + "transparent.png").toString()));
+                            tiles = Tile.deserialize(state[2]);
                             makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
+                            tiles = Tile.deserialize(state[2]);
                             makeBoard();
                         }
 
@@ -255,10 +269,12 @@ public class Game extends Application {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             isGameFinished = true;
                             setImage(new Image(TileGUI.class.getResource(URI_BASE + "B.png").toString()));
+                            tiles = Tile.deserialize(state[2]);
                             makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
+                            tiles = Tile.deserialize(state[2]);
                             makeBoard();
                         }
 
@@ -280,6 +296,7 @@ public class Game extends Application {
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             if (before != null) {
                                 Minesweeper.updateBoardState(state, before.getType() + xs + ys);
+                                tiles = Tile.deserialize(state[2]);
                                 setImage(new Image(TileGUI.class.getResource(URI_BASE + before.getType() + ".png").toString()));
                                 makeBoard();
                             }
@@ -287,6 +304,13 @@ public class Game extends Application {
                     }
                 }
             });
+        }
+
+        @Override
+        public String toString() {
+            String xs = (x < 10) ? "0" + x : x + "";
+            String ys = (y < 10) ? "0" + y : y + "";
+            return this.type + xs + ys;
         }
     }
 
