@@ -10,7 +10,7 @@ public class Tile implements Comparable<Tile> {
     private final String placement;
 
     // Here x and y are coordinate, and don't include 0 for both x and y
-    Tile(String placement) {
+    public Tile(String placement) {
         this.placement = placement;
         this.type = placement.substring(0,1);
         this.x = placement.substring(1,3);
@@ -111,6 +111,15 @@ public class Tile implements Comparable<Tile> {
                 if ((t.getX()+t.getY()).equals(xs+ys)) {
                     return t;
                 }
+            }
+        }
+        return null;
+    }
+
+    public static Tile getExactTile(ArrayList<Tile> tiles, String xs, String ys) {
+        for (Tile x:tiles) {
+            if ((xs+ys).equals(x.getX()+x.getY())) {
+                return x;
             }
         }
         return null;
