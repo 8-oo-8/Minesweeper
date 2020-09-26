@@ -1,6 +1,7 @@
 package Minesweeper;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 public class Tile implements Comparable<Tile> {
@@ -8,6 +9,19 @@ public class Tile implements Comparable<Tile> {
     private final String x;
     private final String y;
     private final String placement;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tile)) return false;
+        Tile tile = (Tile) o;
+        return Objects.equals(type, tile.type) && Objects.equals(x, tile.x) && Objects.equals(y, tile.y) && Objects.equals(placement, tile.placement);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, x, y, placement);
+    }
 
     // Here x and y are coordinate, and don't include 0 for both x and y
     public Tile(String placement) {
@@ -36,7 +50,18 @@ public class Tile implements Comparable<Tile> {
         }
         return tiles;
     }
-
+    public static ArrayList<String> piecesList(String placement) {
+        ArrayList<String> list = new ArrayList<>();
+        if (placement.length() % 5 != 0) {
+            return null;
+        } else {
+            for (int i = 0; i < placement.length(); i += 5) {
+                String sub = placement.substring(i, i + 5);
+                list.add(sub);
+            }
+        }
+        return list;
+    }
     public static String serialize(ArrayList<Tile> tiles) {
         StringBuilder acc = new StringBuilder();
         for (Tile x:tiles) {

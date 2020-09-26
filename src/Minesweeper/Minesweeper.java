@@ -44,7 +44,7 @@ public class Minesweeper {
         return rtn;
     }
 
-    // FIXME: BUGS here
+
     public static void updateBoardState(String[] state, String newTile) {
         int boundX = Integer.parseInt(state[0]);
         int boundY = Integer.parseInt(state[1]);

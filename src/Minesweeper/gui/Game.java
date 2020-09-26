@@ -260,6 +260,22 @@ public class Game extends Application {
                             // TODO: Scan surroundings
                             tiles = Tile.deserialize(state[2]);
                             updateTileGUI(new TileGUI(placement.substring(0,5) + "T"));
+                            String substring = placement.substring(0, 5);
+                            int i = tiles.indexOf( new Tile(substring));
+                            // N / B / F
+                            // 横向距离 1 - 99
+                            // 纵向距离 1 - 99
+                            Hint hint = hints.get(i);
+                            int value = hint.getValue();
+                            if (value==0){
+                                ArrayList<Tile> neighbours = Minesweeper.neighbours(state, placement.substring(1, 3), placement.substring(3, 5));
+                                String serialize = Tile.serialize(neighbours);
+                                ArrayList<String> tiles = Tile.piecesList(serialize);
+                                for (String tile : tiles) {
+                                    updateTileGUI(new TileGUI(tile.substring(0,5)+"T"));
+                                }
+                            }
+
                             makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
@@ -294,9 +310,26 @@ public class Game extends Application {
                                     updateTileGUI(new TileGUI("B" + xs + ys + "B"));
                                 } else {
                                     // TODO: Scan surroundings
+                                    String substring = placement.substring(0, 5);
+                                    System.out.println(substring);
+                                    int i = tiles.indexOf( new Tile(substring));
+                                    // N / B / F
+                                    // 横向距离 1 - 99
+                                    // 纵向距离 1 - 99
+                                    Hint hint = hints.get(i);
+                                    int value = hint.getValue();
+                                    if (value==0){
+                                        ArrayList<Tile> neighbours = Minesweeper.neighbours(state, placement.substring(1, 3), placement.substring(3, 5));
+                                        String serialize = Tile.serialize(neighbours);
+                                        ArrayList<String> tiles = Tile.piecesList(serialize);
+                                        for (String tile : tiles) {
+                                            updateTileGUI(new TileGUI(tile.substring(0,5)+"T"));
+                                        }
+                                    }
                                     Minesweeper.updateBoardState(state, "N" + xs + ys);
                                     tiles = Tile.deserialize(state[2]);
                                     updateTileGUI(new TileGUI("N" + xs + ys + "T"));
+
                                 }
                                 makeBoard();
                             }
