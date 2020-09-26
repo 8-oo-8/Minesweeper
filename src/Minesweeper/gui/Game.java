@@ -257,7 +257,6 @@ public class Game extends Application {
                     String ys = (y < 10) ? "0" + y : y + "";
                     if (type.equals("N")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
-                            // TODO: Scan surroundings
                             tiles = Tile.deserialize(state[2]);
                             updateTileGUI(new TileGUI(placement.substring(0,5) + "T"));
                             String substring = placement.substring(0, 5);
@@ -309,9 +308,8 @@ public class Game extends Application {
                                     tiles = Tile.deserialize(state[2]);
                                     updateTileGUI(new TileGUI("B" + xs + ys + "B"));
                                 } else {
-                                    // TODO: Scan surroundings
                                     String substring = placement.substring(0, 5);
-                                    System.out.println(substring);
+
                                     int i = tiles.indexOf( new Tile(substring));
                                     // N / B / F
                                     // 横向距离 1 - 99
