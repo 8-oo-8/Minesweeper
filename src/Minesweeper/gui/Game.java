@@ -4,8 +4,6 @@ import Minesweeper.Minesweeper;
 import Minesweeper.Tile;
 import Minesweeper.Hint;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -169,6 +167,7 @@ public class Game extends Application {
                     state = Minesweeper.generateBoardState(gameWidth, gameHeight, gameBomb);
                     hints = Minesweeper.generateHint(state);
                     tiles = Tile.deserialize(state[2]);
+                    showTile = drawTiles();
 
                     gameRoot.getChildren().add(gameHint);
                     gameRoot.getChildren().add(gameBoard);
@@ -185,32 +184,33 @@ public class Game extends Application {
                     problemNumber = true;
                     makeIntroInstruction();
                 }
-            } catch (Exception ignored) {
+            } catch (NullPointerException ignored) {
                 problemNumber = true;
                 makeIntroInstruction();
             }
         });
     }
 
+    private boolean isGameSuccess() {
+        // TODO: Implement this for scanning the end of the game
+        return false;
+    }
+
     private void makeBoard() {
         gameBoard.getChildren().clear();
 
-        showTile = drawTiles();
-        for (TileGUI s : showTile
-        ) {
-            System.out.println(s);
-        }
         gameBoard.getChildren().addAll(showTile);
     }
 
     private ArrayList<TileGUI> drawTiles() {
         ArrayList<TileGUI> rtn = new ArrayList<>();
         for (Tile x : tiles) {
-            rtn.add(new TileGUI(x.toString()));
+            rtn.add(new TileGUI(x.toString() + "N"));
         }
         return rtn;
     }
 
+    // Make the hinter layer
     private void makeHinter() {
         showHint = drawHints();
 
@@ -218,6 +218,7 @@ public class Game extends Application {
         gameHint.toBack();
     }
 
+    // Transform from the game state to the ArrayList of visible hints
     private ArrayList<HintGUI> drawHints() {
         ArrayList<HintGUI> rtn = new ArrayList<>();
         for (Hint x : hints) {
@@ -226,18 +227,21 @@ public class Game extends Application {
         return rtn;
     }
 
+    // TileGUI inner class
     class TileGUI extends ImageView {
         String type;
         int x;
         int y;
+        String showType;
         TileGUI(String placement) {
             type = placement.substring(0, 1);
             x = Integer.parseInt(placement.substring(1, 3));
             y = Integer.parseInt(placement.substring(3, 5));
+            showType = placement.substring(5, 6);
 
             // Load the Normal image
             Image image;
-            image = new Image(TileGUI.class.getResource(URI_BASE + "N.png").toString());
+            image = new Image(TileGUI.class.getResource(URI_BASE + showType +".png").toString());
             setImage(image);
 
             // Put the image to the correct place
@@ -249,32 +253,33 @@ public class Game extends Application {
             // Set on event handler
             setOnMousePressed(event -> {
                 if (!isGameFinished) {
-                    // FIXME: Can't read and show the new image(should replace tile, not load again)
                     String xs = (x < 10) ? "0" + x : x + "";
                     String ys = (y < 10) ? "0" + y : y + "";
                     if (type.equals("N")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             // TODO: Scan surroundings
-                            setImage(new Image(TileGUI.class.getResource(URI_BASE + "transparent.png").toString()));
                             tiles = Tile.deserialize(state[2]);
+                            updateTileGUI(new TileGUI(placement.substring(0,5) + "T"));
                             makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
                             tiles = Tile.deserialize(state[2]);
+                            updateTileGUI(new TileGUI("F" + xs + ys + "F"));
                             makeBoard();
                         }
 
                     } else if (type.equals("B")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             isGameFinished = true;
-                            setImage(new Image(TileGUI.class.getResource(URI_BASE + "B.png").toString()));
                             tiles = Tile.deserialize(state[2]);
+                            updateTileGUI(new TileGUI("B" + xs + ys + "B"));
                             makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
                             tiles = Tile.deserialize(state[2]);
+                            updateTileGUI(new TileGUI("F" + xs + ys + "F"));
                             makeBoard();
                         }
 
@@ -285,11 +290,13 @@ public class Game extends Application {
                                 if (before.getType().equals("B")) {
                                     isGameFinished = true;
                                     Minesweeper.updateBoardState(state, "B" + xs + ys);
-                                    setImage(new Image(TileGUI.class.getResource(URI_BASE + "B.png").toString()));
+                                    tiles = Tile.deserialize(state[2]);
+                                    updateTileGUI(new TileGUI("B" + xs + ys + "B"));
                                 } else {
                                     // TODO: Scan surroundings
                                     Minesweeper.updateBoardState(state, "N" + xs + ys);
-                                    setImage(new Image(TileGUI.class.getResource(URI_BASE + "transparent.png").toString()));
+                                    tiles = Tile.deserialize(state[2]);
+                                    updateTileGUI(new TileGUI("N" + xs + ys + "T"));
                                 }
                                 makeBoard();
                             }
@@ -297,13 +304,28 @@ public class Game extends Application {
                             if (before != null) {
                                 Minesweeper.updateBoardState(state, before.getType() + xs + ys);
                                 tiles = Tile.deserialize(state[2]);
-                                setImage(new Image(TileGUI.class.getResource(URI_BASE + before.getType() + ".png").toString()));
+                                updateTileGUI(new TileGUI(before.getType() + xs + ys + "N"));
                                 makeBoard();
                             }
                         }
+                        original.remove(before);
                     }
                 }
             });
+        }
+
+        int getWidth() { return this.x; }
+
+        int getHeight() { return this.y; }
+
+        void updateTileGUI(TileGUI newTileGUI) {
+            for (int i = 0; i < showTile.size(); i++) {
+                if ((showTile.get(i).getWidth() + "" + showTile.get(i).getHeight()).equals(
+                        newTileGUI.getWidth() + "" + newTileGUI.getHeight())) {
+                    showTile.remove(showTile.get(i));
+                    showTile.add(newTileGUI);
+                }
+            }
         }
 
         @Override
@@ -314,6 +336,7 @@ public class Game extends Application {
         }
     }
 
+    // HintGUI inner class
     static class HintGUI extends ImageView {
         private final int value;
         private final int x;
