@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -21,6 +22,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class Game extends Application {
@@ -41,13 +43,16 @@ public class Game extends Application {
     private final Group gameRoot = new Group();
     private final Group gameHint = new Group();
     private final Group gameBoard = new Group();
+    private final StackPane gameInstruction = new StackPane();
     private boolean isGameFinished = false;
+    private boolean isGameSuccess = false;
+    private int normalTileNum;
     private String[] state;
-    ArrayList<Tile> tiles;
-    ArrayList<TileGUI> showTile;
-    ArrayList<Hint> hints;
-    ArrayList<HintGUI> showHint;
-    ArrayList<Tile> original = new ArrayList<>();
+    private ArrayList<Tile> tiles;
+    private ArrayList<TileGUI> showTile;
+    private ArrayList<Hint> hints;
+    private final HashSet<Tile> clickedNormal = new HashSet<>();
+    private final ArrayList<Tile> original = new ArrayList<>();
 
 
     @Override
@@ -168,9 +173,12 @@ public class Game extends Application {
                     hints = Minesweeper.generateHint(state);
                     tiles = Tile.deserialize(state[2]);
                     showTile = drawTiles();
+                    normalTileNum = gameWidth * gameHeight - gameBomb;
+
 
                     gameRoot.getChildren().add(gameHint);
                     gameRoot.getChildren().add(gameBoard);
+                    gameRoot.getChildren().add(gameInstruction);
 
                     makeHinter();
                     makeBoard();
@@ -184,16 +192,45 @@ public class Game extends Application {
                     problemNumber = true;
                     makeIntroInstruction();
                 }
-            } catch (NullPointerException ignored) {
+            } catch (Exception ignored) {
                 problemNumber = true;
                 makeIntroInstruction();
             }
         });
     }
 
-    private boolean isGameSuccess() {
-        // TODO: Implement this for scanning the end of the game
-        return false;
+    private void isGameSuccess() {
+        if (Tile.isNoBomb(tiles)) {
+            if (normalTileNum == clickedNormal.size()) {
+                isGameFinished = true;
+                isGameSuccess = true;
+            }
+        }
+    }
+
+    private void checkGameFinished() {
+        if (isGameFinished) {
+            makeInstruction();
+        }
+    }
+
+    private void makeInstruction() {
+        gameInstruction.getChildren().clear();
+
+        Text t = new Text();
+        t.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+
+        if (isGameFinished) {
+            if (isGameSuccess) {
+                t.setText("You win!");
+                t.setFill(Color.GREEN);
+            } else {
+                t.setText("You lose!");
+                t.setFill(Color.RED);
+            }
+        }
+
+        gameInstruction.getChildren().add(t);
     }
 
     private void makeBoard() {
@@ -212,7 +249,7 @@ public class Game extends Application {
 
     // Make the hinter layer
     private void makeHinter() {
-        showHint = drawHints();
+        ArrayList<HintGUI> showHint = drawHints();
 
         gameHint.getChildren().addAll(showHint);
         gameHint.toBack();
@@ -233,11 +270,14 @@ public class Game extends Application {
         int x;
         int y;
         String showType;
+        String placement;
+
         TileGUI(String placement) {
             type = placement.substring(0, 1);
             x = Integer.parseInt(placement.substring(1, 3));
             y = Integer.parseInt(placement.substring(3, 5));
             showType = placement.substring(5, 6);
+            this.placement = placement;
 
             // Load the Normal image
             Image image;
@@ -255,33 +295,24 @@ public class Game extends Application {
                 if (!isGameFinished) {
                     String xs = (x < 10) ? "0" + x : x + "";
                     String ys = (y < 10) ? "0" + y : y + "";
+                    String central = placement.substring(0, 5);
                     if (type.equals("N")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             tiles = Tile.deserialize(state[2]);
-                            updateTileGUI(new TileGUI(placement.substring(0,5) + "T"));
-                            String substring = placement.substring(0, 5);
-                            int i = tiles.indexOf( new Tile(substring));
-                            // N / B / F
-                            // 横向距离 1 - 99
-                            // 纵向距离 1 - 99
-                            Hint hint = hints.get(i);
-                            int value = hint.getValue();
-                            if (value==0){
-                                ArrayList<Tile> neighbours = Minesweeper.neighbours(state, placement.substring(1, 3), placement.substring(3, 5));
-                                String serialize = Tile.serialize(neighbours);
-                                ArrayList<String> tiles = Tile.piecesList(serialize);
-                                for (String tile : tiles) {
-                                    updateTileGUI(new TileGUI(tile.substring(0,5)+"T"));
-                                }
-                            }
-
+                            updateTileGUI(new TileGUI(central + "T"));
+                            clickedNormal.add(new Tile(central));
+                            scanSurroundings(central);
                             makeBoard();
+                            isGameSuccess();
+                            checkGameFinished();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
                             tiles = Tile.deserialize(state[2]);
                             updateTileGUI(new TileGUI("F" + xs + ys + "F"));
                             makeBoard();
+                            isGameSuccess();
+                            checkGameFinished();
                         }
 
                     } else if (type.equals("B")) {
@@ -289,14 +320,15 @@ public class Game extends Application {
                             isGameFinished = true;
                             tiles = Tile.deserialize(state[2]);
                             updateTileGUI(new TileGUI("B" + xs + ys + "B"));
-                            makeBoard();
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             original.add(new Tile(type + xs + ys));
                             Minesweeper.updateBoardState(state, "F" + xs + ys);
                             tiles = Tile.deserialize(state[2]);
                             updateTileGUI(new TileGUI("F" + xs + ys + "F"));
-                            makeBoard();
                         }
+                        makeBoard();
+                        isGameSuccess();
+                        checkGameFinished();
 
                     } else {
                         Tile before = Tile.getExactTile(original, xs, ys);
@@ -308,28 +340,15 @@ public class Game extends Application {
                                     tiles = Tile.deserialize(state[2]);
                                     updateTileGUI(new TileGUI("B" + xs + ys + "B"));
                                 } else {
-                                    String substring = placement.substring(0, 5);
-
-                                    int i = tiles.indexOf( new Tile(substring));
-                                    // N / B / F
-                                    // 横向距离 1 - 99
-                                    // 纵向距离 1 - 99
-                                    Hint hint = hints.get(i);
-                                    int value = hint.getValue();
-                                    if (value==0){
-                                        ArrayList<Tile> neighbours = Minesweeper.neighbours(state, placement.substring(1, 3), placement.substring(3, 5));
-                                        String serialize = Tile.serialize(neighbours);
-                                        ArrayList<String> tiles = Tile.piecesList(serialize);
-                                        for (String tile : tiles) {
-                                            updateTileGUI(new TileGUI(tile.substring(0,5)+"T"));
-                                        }
-                                    }
                                     Minesweeper.updateBoardState(state, "N" + xs + ys);
                                     tiles = Tile.deserialize(state[2]);
                                     updateTileGUI(new TileGUI("N" + xs + ys + "T"));
-
+                                    clickedNormal.add(new Tile("N" + xs + ys));
+                                    scanSurroundings(central);
                                 }
                                 makeBoard();
+                                isGameSuccess();
+                                checkGameFinished();
                             }
                         } else if (event.getButton() == MouseButton.SECONDARY) {
                             if (before != null) {
@@ -337,6 +356,8 @@ public class Game extends Application {
                                 tiles = Tile.deserialize(state[2]);
                                 updateTileGUI(new TileGUI(before.getType() + xs + ys + "N"));
                                 makeBoard();
+                                isGameSuccess();
+                                checkGameFinished();
                             }
                         }
                         original.remove(before);
@@ -355,6 +376,28 @@ public class Game extends Application {
                         newTileGUI.getWidth() + "" + newTileGUI.getHeight())) {
                     showTile.remove(showTile.get(i));
                     showTile.add(newTileGUI);
+                }
+            }
+        }
+
+        void scanSurroundings(String central) {
+            // Get the index of the instance Tile
+            int i = tiles.indexOf( new Tile(central));
+            if (i == -1) throw new IllegalArgumentException();
+            // Get the hint below the instance Tile
+            Hint hint = hints.get(i);
+            // Get the hint below the instance Tile
+            int value = hint.getValue();
+            // If it's 0, make the surroundings visible
+            if (value==0) {
+                ArrayList<Tile> neighbours = Minesweeper.neighbours(state, placement.substring(1, 3), placement.substring(3, 5));
+                String serialize = Tile.serialize(neighbours);
+                ArrayList<String> tiles = Tile.piecesList(serialize);
+                if (tiles != null) {
+                    for (String tile : tiles) {
+                        updateTileGUI(new TileGUI(tile.substring(0, 5) + "T"));
+                        clickedNormal.add(new Tile(tile));
+                    }
                 }
             }
         }

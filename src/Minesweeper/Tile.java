@@ -50,6 +50,7 @@ public class Tile implements Comparable<Tile> {
         }
         return tiles;
     }
+
     public static ArrayList<String> piecesList(String placement) {
         ArrayList<String> list = new ArrayList<>();
         if (placement.length() % 5 != 0) {
@@ -148,6 +149,17 @@ public class Tile implements Comparable<Tile> {
             }
         }
         return null;
+    }
+
+    public static boolean isNoBomb(ArrayList<Tile> tiles) {
+        boolean rtn = true;
+        for (Tile x:tiles) {
+            if (x.getType().equals("B")) {
+                rtn = false;
+                break;
+            }
+        }
+        return rtn;
     }
 
     @Override
