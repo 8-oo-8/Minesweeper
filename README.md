@@ -4,7 +4,7 @@ The famous little game: Minesweeper
 - Make sure you have the standard java development tool (jdk) Version 14.0, and have set up the PATH VARIABLE for it.
 - Open a terminal and type 
 
- * java --module-path PATH\TO\THIS\FOLDER\javafx-sdk-14.0.2.1\lib --add-modules=javafx.controls,javafx.fxml,javafx.media -jar Minesweeper.jar*
+- *java --module-path PATH\TO\THIS\FOLDER\javafx-sdk-14.0.2.1\lib --add-modules=javafx.controls,javafx.fxml,javafx.media -jar Minesweeper.jar*
  
 - Then hit enter. The gui of the game should then appear.
 # Instruction
