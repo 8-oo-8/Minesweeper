@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -30,7 +31,8 @@ public class Game extends Application {
     private static final int introHeight = 768;
     private static final int tileSize = 30;
     private static final String URI_BASE = "assets/";
-
+    AudioClip loop;
+    String LOOP_URI2 = Game.class.getResource(URI_BASE + 2 + ".wav").toString();
     private final Group introRoot = new Group();
     private final Group introControls = new Group();
     private final Group introBackground = new Group();
@@ -164,7 +166,7 @@ public class Game extends Application {
                 int gameHeight = Integer.parseInt(heightTextField.getText());
                 int gameBomb = Integer.parseInt(bombNumber.getText());
 
-                if (gameBomb >= 0 && gameBomb < gameWidth * gameHeight && gameWidth > 0 && gameWidth < 100 &&
+                if (gameBomb > 0 && gameBomb < gameWidth * gameHeight && gameWidth > 0 && gameWidth < 100 &&
                         gameHeight > 0 && gameHeight < 100 && (gameWidth != 1 || gameHeight != 1)) {
 
                     Scene gameScene = new Scene(gameRoot, tileSize * gameWidth, tileSize * gameHeight);
@@ -219,13 +221,20 @@ public class Game extends Application {
 
         Text t = new Text();
         t.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
-
+        Image image = new Image(Game.class.getResource(URI_BASE + "success.png").toString());
         if (isGameFinished) {
             if (isGameSuccess) {
-                t.setText("You win!");
+                t.setText("bomb has been defuse");
                 t.setFill(Color.GREEN);
+                ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(200);
+                    imageView.setFitHeight(200);
+
+                loop = new AudioClip(Game.class.getResource(URI_BASE + 2 + ".wav").toString());
+                loop.play();
+                gameInstruction.getChildren().add(imageView);
             } else {
-                t.setText("You lose!");
+                t.setText("Terrorist win");
                 t.setFill(Color.RED);
             }
         }
