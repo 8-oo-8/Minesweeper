@@ -32,7 +32,6 @@ public class Game extends Application {
     private static final int tileSize = 30;
     private static final String URI_BASE = "assets/";
     AudioClip loop;
-    String LOOP_URI2 = Game.class.getResource(URI_BASE + 2 + ".wav").toString();
     private final Group introRoot = new Group();
     private final Group introControls = new Group();
     private final Group introBackground = new Group();
@@ -304,7 +303,7 @@ public class Game extends Application {
                 if (!isGameFinished) {
                     String xs = (x < 10) ? "0" + x : x + "";
                     String ys = (y < 10) ? "0" + y : y + "";
-                    String central = placement.substring(0, 5);
+                    String central = this.placement.substring(0, 5);
                     if (type.equals("N")) {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             tiles = Tile.deserialize(state[2]);
@@ -353,7 +352,7 @@ public class Game extends Application {
                                     tiles = Tile.deserialize(state[2]);
                                     updateTileGUI(new TileGUI("N" + xs + ys + "T"));
                                     clickedNormal.add(new Tile("N" + xs + ys));
-                                    scanSurroundings(central);
+                                    scanSurroundings("N" + central.substring(1, 5));
                                 }
                                 makeBoard();
                                 isGameSuccess();
