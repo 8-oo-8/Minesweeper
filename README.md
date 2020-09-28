@@ -13,3 +13,5 @@ The famous little game: Minesweeper
 - Then hit enter. The gui of the game should then appear.
 # Instruction
 Enter two numbers from 1-99 (inclusive) which represent width and height. Also enter the number of bombs. It should be larger than 1 and smaller than the total number of tiles. Hit Start button to initialize the gameplay.
+
+*Strongly suggest the gameplay with 10\*10 board and 10-15 bombs.*

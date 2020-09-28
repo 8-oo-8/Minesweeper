@@ -226,8 +226,8 @@ public class Game extends Application {
                 t.setText("bomb has been defuse");
                 t.setFill(Color.GREEN);
                 ImageView imageView = new ImageView(image);
-                    imageView.setFitWidth(200);
-                    imageView.setFitHeight(200);
+                    imageView.setFitWidth(150);
+                    imageView.setFitHeight(150);
 
                 loop = new AudioClip(Game.class.getResource(URI_BASE + 2 + ".wav").toString());
                 loop.play();
@@ -237,7 +237,6 @@ public class Game extends Application {
                 t.setFill(Color.RED);
             }
         }
-
         gameInstruction.getChildren().add(t);
     }
 
