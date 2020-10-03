@@ -4,6 +4,7 @@ import Minesweeper.Minesweeper;
 import Minesweeper.Tile;
 import Minesweeper.Hint;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -41,6 +42,7 @@ public class Game extends Application {
     private TextField bombNumber;
     private boolean problemNumber = false;
 
+    private Stage window;
     private final Group gameRoot = new Group();
     private final Group gameHint = new Group();
     private final Group gameBoard = new Group();
@@ -184,7 +186,7 @@ public class Game extends Application {
                     makeHinter();
                     makeBoard();
 
-                    Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+                    window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
                     window.setScene(gameScene);
                     window.show();
@@ -223,7 +225,7 @@ public class Game extends Application {
         Image image = new Image(Game.class.getResource(URI_BASE + "success.png").toString());
         if (isGameFinished) {
             if (isGameSuccess) {
-                t.setText("bomb has been defuse");
+                t.setText("Bomb has been defuse");
                 t.setFill(Color.GREEN);
                 ImageView imageView = new ImageView(image);
                     imageView.setFitWidth(150);
@@ -236,6 +238,23 @@ public class Game extends Application {
                 t.setText("Terrorist win");
                 t.setFill(Color.RED);
             }
+
+            Button restart = new Button("RESTART");
+
+            restart.setLayoutX(75);
+            restart.setLayoutY(100);
+            restart.setPrefWidth(195);
+            restart.setPrefHeight(60);
+            restart.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+            restart.setStyle("-fx-background-color: #55cc55; " +
+                    "-fx-border-color: #000000; " +
+                    "-fx-border-width: 5px;");
+
+            restart.setOnAction(event -> {
+                window.close();
+                Platform.runLater(() -> new Game().start(new Stage()));
+            });
+            gameRoot.getChildren().add(restart);
         }
         gameInstruction.getChildren().add(t);
     }
